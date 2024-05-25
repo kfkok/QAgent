@@ -103,6 +103,22 @@ class QAgent:
         plt.xticks(positions, x)  # Set the x-axis ticks to match positions, with labels from x
         plt.show()
 
+    def plot_epsilon_decay(self, epsilon_over_episodes):
+        """Plot epsilon values over episodes"""
+        plt.plot(epsilon_over_episodes)
+        plt.xlabel("Episode")
+        plt.ylabel("Epsilon Value")
+        plt.title("Epsilon Decay")
+        plt.show()
+
+    def plot_rewards_over_episodes(self, rewards_over_episodes):
+        """Plot rewards over episodes"""
+        plt.plot(rewards_over_episodes)
+        plt.xlabel("Episode")
+        plt.ylabel("Total Reward")
+        plt.title("Q-Learning Training Progress")
+        plt.show()
+
     def train(self, episodes, initial_epsilon=1.0, min_epsilon=0.5, decay_percentage=0.5):
         """Train the agent using Q-Learning algorithm"""
         """episodes: Number of episodes to train the agent"""
@@ -112,16 +128,18 @@ class QAgent:
         
         epsilon = initial_epsilon
         rewards_over_episodes = []  # List to store rewards per episode
+        epsilon_over_episodes = []  # List to store epsilon values per episode
         state_visit_count = dict()  # Dictionary to store the number of times each state is visited
 
         print("Training started...")
+        print("------------------- Training Parameters -------------------")
         print("Initial Epsilon: ", initial_epsilon)
         print("Minimum Epsilon: ", min_epsilon)
         print("Decay Percentage: ", decay_percentage)
         print("State Rounding: ", self.state_rounding)
         print("Learning Rate: ", self.learning_rate)
         print("Discount Factor: ", self.discount_factor)
-        print("State Visit Count:", state_visit_count)
+        print("-----------------------------------------------------------")
 
         decay_rate = (min_epsilon / initial_epsilon) ** (1.0 / (decay_percentage * episodes))
 
@@ -133,6 +151,7 @@ class QAgent:
 
             # Decay the epsilon value
             epsilon = max(min_epsilon, initial_epsilon * decay_rate ** (episode))
+            epsilon_over_episodes.append(epsilon)
             
             while not done:
                 if not discrete_next_state:                 
@@ -162,19 +181,12 @@ class QAgent:
 
             rewards_over_episodes.append(episode_reward)
 
-            if episode % 10 == 0:  # Print progress update every 10 episodes
+            if episode % 100 == 0:  # Print progress update every 100 episodes
                 print(f"Episode: {episode}, Total Reward: {episode_reward}", "Epsilon: ", epsilon)
 
         print("Training complete.")
 
         self.plot_state_visit_frequencies(state_visit_count)
-
-        # Plot rewards after training
-        plt.plot(rewards_over_episodes)
-        plt.xlabel("Episode")
-        plt.ylabel("Total Reward")
-        plt.title("Q-Learning Training Progress")
-        plt.show()
-   
-
+        self.plot_epsilon_decay(epsilon_over_episodes)
+        self.plot_rewards_over_episodes(rewards_over_episodes)
 
